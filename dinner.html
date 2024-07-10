@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lunch Diet Plans</title>
+    <style>
+        /* Add your styles here, similar to the ones in the main HTML file */
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f7eedc;
+            margin: 0;
+            padding: 0;
+        }
+        header {
+            background-color: #c297d8;
+            color: white;
+            padding: 10px;
+            text-align: center;
+            position: relative;
+        }
+        header .right {
+            position: absolute;
+            right: 20px;
+            top: 10px;
+        }
+        header .right a {
+            background-color: #ffefdb;
+            color: #c297d8;
+            padding: 10px 20px;
+            border-radius: 5px;
+            text-decoration: none;
+        }
+        .content {
+            padding: 20px;
+        }
+        .tabs {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 20px;
+        }
+        .tabs button {
+            background-color: #ccc;
+            border: none;
+            padding: 10px 20px;
+            cursor: pointer;
+            margin: 0 5px;
+            border-radius: 5px;
+        }
+        .tabs button.active {
+            background-color: #c297d8;
+            color: white;
+        }
+        .section {
+            display: none;
+        }
+        .section.active {
+            display: block;
+        }
+        .food-items {
+            display: flex;
+            flex-wrap: wrap;
+        }
+        .food-items div {
+            background-color: white;
+            border-radius: 5px;
+            padding: 10px;
+            margin: 10px;
+            flex: 1 1 calc(33% - 20px);
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+            cursor: pointer;
+        }
+        .food-items div.selected {
+            border: 2px solid #c297d8;
+        }
+        .calculator {
+            background-color: #c297d8;
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+        }
+        .diet-plan {
+            background-color: #d69cd6;
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+            text-align: center;
+        }
+        .diet-plan button {
+            background-color: white;
+            color: #c297d8;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        footer {
+            background-color: #f4f4f4;
+            padding: 20px;
+            text-align: center;
+        }
+        footer a {
+            color: #c297d8;
+            text-decoration: none;
+            margin: 0 10px;
+        }
+        footer input[type="email"] {
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            margin-right: 10px;
+        }
+    </style>
+    <!-- Include jsPDF from a CDN -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+</head>
+<body>
+    <header>
+        <h1>FIT-DIET</h1>
+        <div class="right">
+            <a href="index.html">Create Diet Plan</a>
+        </div>
+    </header>
+    <div class="content">
+        <h2>Dinner Diet Plans</h2>
+        
+        <div class="food-items">
+            <div data-calories="260" data-protein="5.90" data-fat="5.70" data-carbs="47">Hard Red Wheat </div>
+            <div data-calories="121" data-protein="2.5" data-fat="0.4" data-carbs="26">Soft Red Wheat </div>
+            <div data-calories="33" data-protein="1.3" data-fat="0.1" data-carbs="7.6">Hard White Wheat </div>
+            <div data-calories="48" data-protein="0.5" data-fat="0.1" data-carbs="12">Roti </div>
+            <div data-calories="160" data-protein="2" data-fat="15" data-carbs="9">Paratha </div>
+            <div data-calories="105" data-protein="1.3" data-fat="0.3" data-carbs="27">Garlic </div>
+            <div data-calories="173.95" data-protein="7.35" data-fat="4.17" data-carbs="27.68">Tomato soup </div>
+            <div data-calories="15" data-protein="2.2" data-fat="0.3" data-carbs="3.3">Mushroom </div>
+            <div data-calories="20" data-protein="0.9" data-fat="0.1" data-carbs="4.6">Potato soup </div>
+            <div data-calories="183.67" data-protein="4.0" data-fat="18.76" data-carbs="0.78">Brazil nuts </div>
+            <div data-calories="54.00" data-protein="1.20" data-fat="0.12" data-carbs="14.88">Butter Nut </div>
+            <div data-calories="136" data-protein="16" data-fat="52" data-carbs="12">Tuna salad </div>
+            <div data-calories="137" data-protein="1.40" data-fat="4.90" data-carbs="22.00">Ambrosia salad </div>
+        </div>
+        <div class="calculator">
+            <h3>Calculator</h3>
+            <p>Calories: <span id="calories">0.00</span> Kcal</p>
+            <p>Protein: <span id="protein">0.00</span> g</p>
+            <p>Fat: <span id="fat">0.00</span> g</p>
+            <p>Carbs: <span id="carbs">0.00</span> g</p>
+            <button id="generate-chart">Diet Chart</button>
+        </div>
+        <div class="diet-plan">
+            <h3>Your Diet Plan</h3>
+            <div id="selected-items">No items selected yet.</div>
+            <button id="download-pdf">Download as PDF</button>
+        </div>
+    </div>
+    <footer>
+        <p>FIT-DIET</p>
+       
+    </footer>
+    <script>
+        const foodItems = document.querySelectorAll('.food-items div');
+        const caloriesEl = document.getElementById('calories');
+        const proteinEl = document.getElementById('protein');
+        const fatEl = document.getElementById('fat');
+        const carbsEl = document.getElementById('carbs');
+        const selectedItemsEl = document.getElementById('selected-items');
+        const generateChartBtn = document.getElementById('generate-chart');
+        const downloadPdfBtn = document.getElementById('download-pdf');
+
+        let totalCalories = 0;
+        let totalProtein = 0;
+        let totalFat = 0;
+        let totalCarbs = 0;
+
+        foodItems.forEach(item => {
+            item.addEventListener('click', () => {
+                item.classList.toggle('selected');
+
+                const calories = parseFloat(item.getAttribute('data-calories'));
+                const protein = parseFloat(item.getAttribute('data-protein'));
+                const fat = parseFloat(item.getAttribute('data-fat'));
+                const carbs = parseFloat(item.getAttribute('data-carbs'));
+
+                if (item.classList.contains('selected')) {
+                    totalCalories += calories;
+                    totalProtein += protein;
+                    totalFat += fat;
+                    totalCarbs += carbs;
+                } else {
+                    totalCalories -= calories;
+                    totalProtein -= protein;
+                    totalFat -= fat;
+                    totalCarbs -= carbs;
+                }
+
+                caloriesEl.textContent = totalCalories.toFixed(2);
+                proteinEl.textContent = totalProtein.toFixed(2);
+                fatEl.textContent = totalFat.toFixed(2);
+                carbsEl.textContent = totalCarbs.toFixed(2);
+
+                updateSelectedItems();
+            });
+        });
+
+        function updateSelectedItems() {
+            const selectedItems = document.querySelectorAll('.food-items div.selected');
+            if (selectedItems.length > 0) {
+                selectedItemsEl.innerHTML = '';
+                selectedItems.forEach(item => {
+                    const clone = item.cloneNode(true);
+                    clone.classList.remove('selected');
+                    selectedItemsEl.appendChild(clone);
+                });
+            } else {
+                selectedItemsEl.textContent = 'No items selected yet.';
+            }
+        }
+
+        downloadPdfBtn.addEventListener('click', () => {
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
+
+            doc.text('Your Diet Plan', 10, 10);
+            const selectedItems = document.querySelectorAll('.food-items div.selected');
+            let y = 20;
+            selectedItems.forEach(item => {
+                doc.text(item.textContent, 10, y);
+                y += 10;
+            });
+
+            doc.text(`Calories: ${totalCalories.toFixed(2)} Kcal`, 10, y + 10);
+            doc.text(`Protein: ${totalProtein.toFixed(2)} g`, 10, y + 20);
+            doc.text(`Fat: ${totalFat.toFixed(2)} g`, 10, y + 30);
+            doc.text(`Carbs: ${totalCarbs.toFixed(2)} g`, 10, y + 40);
+
+            doc.save('diet-plan.pdf');
+        });
+    </script>
+</body>
+</html>
